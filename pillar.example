@@ -33,7 +33,7 @@ osquery:
       config_dataset:
         options:
           config_plugin: 'filesystem'
-          logger_plugin: 'filesystem'
+          logger_plugin: 'syslog'
           logger_path: '/var/log/osquery'
           disable_logging: 'false'
           pidfile: '/var/osquery/osqueryd.pidfile'

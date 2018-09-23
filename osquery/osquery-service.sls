@@ -5,3 +5,7 @@ service-osquery:
   service.running:
     - name: {{ config.package.service }}
     - enable: True
+    - watch_in:
+      - file: /etc/osquery/osquery.flags
+      - file: /etc/osquery/osquery.conf
+
