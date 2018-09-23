@@ -1,0 +1,61 @@
+# osquery docs https://osquery.readthedocs.io/en/stable/
+osquery:
+  lookup:
+    package:
+    {% if grains['os_family'] == 'RedHat' %}
+      service: 'osqueryd'                           # Name of service to manage
+      install_type: 'local'                         # Install type can be package or local (support for tarball not implemented) 
+      local_package:                                # Can be multiple packages
+        - pack_id: 'osquery-final'
+          package: 'osquery-3.3.0-1.linux.x86_64'   # Local package to be deployed
+          name: 'osquery'                           # Name of installed package
+          type: 'rpm'                               # Type should be deb or rpm based on platform
+      use_repo: 'False'                             # Can be installed from repos or a local rpm
+      repo_baseurl: ''
+      repo_gpgkey: ''
+      skip_verify: '0'
+    {% elif grains['os_family'] == 'Debian' %}
+      service: 'osqueryd'                           # Name of service to manage
+      install_type: 'local'                         # Install type can be package or local (support for tarball not implemented) 
+      local_package:                                # Can be multiple packages
+        - pack_id: 'osquery-final'
+          package: 'osquery-3.3.0-1.linux.amd64'    # Local package to be deployed
+          name: 'osquery'                           # Name of installed package
+          type: 'deb'                               # Type should be deb or rpm based on platform
+      use_repo: 'False'                             # Debian 9 does not require an external repo
+      repo_baseurl: ''
+      repo_gpgkey: ''
+      skip_verify: '0'
+    {% endif %}
+    osquery:
+      use_logrotate: 'True'
+      logrotate_config: '/etc/logrotate.d/osquery'
+      config_dataset:
+        options:
+          config_plugin: 'filesystem'
+          logger_plugin: 'filesystem'
+          logger_path: '/var/log/osquery'
+          disable_logging: 'false'
+          pidfile: '/var/osquery/osqueryd.pidfile'
+          #schedule_splay_percent: '10'
+          #database_path: '/var/osquery/osquery.db'
+          #disable_tables: 'foo_bar,time'
+          utc: 'true'
+        schedule:
+          system_info:
+            query: 'SELECT hostname, cpu_brand, physical_memory FROM system_info;'
+            interval: '3600'
+        decorators:
+          load:
+            - 'SELECT uuid AS host_uuid FROM system_info;'
+            #- 'SELECT user AS username FROM logged_in_users ORDER BY time DESC LIMIT 1;'
+        packs:
+          osquery-monitoring: /usr/share/osquery/packs/osquery-monitoring.conf
+          ossec-rootkit: /usr/share/osquery/packs/ossec-rootkit.conf
+          incident-response: /usr/share/osquery/packs/incident-response.conf
+          it-compliance: /usr/share/osquery/packs/it-compliance.conf
+          vuln-management: /usr/share/osquery/packs/vuln-management.conf
+          hardware-monitoring: /usr/share/osquery/packs/hardware-monitoring.conf
+          #osx-attacks: /usr/share/osquery/packs/osx-attacks.conf
+          #windows-hardening: C:\\ProgramData\\osquery\\packs\\windows-hardening.conf
+          #windows-attacks: C:\\ProgramData\\osquery\\packs\\windows-attacks.conf

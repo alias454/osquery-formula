@@ -1,0 +1,113 @@
+# Add default osquery packs or install your own.
+#
+# There are several 'default' packs installed with 'make install' or via
+# packages and/or Homebrew.
+#
+# Linux:        /usr/share/osquery/packs
+# OS X:         /var/osquery/packs
+# Homebrew:     /usr/local/share/osquery/packs
+# make install: {PREFIX}/share/osquery/packs
+#
+#'packs': {
+  # 'osquery-monitoring': '/usr/share/osquery/packs/osquery-monitoring.conf',
+  # 'incident-response': '/usr/share/osquery/packs/incident-response.conf',
+  # 'it-compliance': '/usr/share/osquery/packs/it-compliance.conf',
+  # 'osx-attacks': '/usr/share/osquery/packs/osx-attacks.conf',
+  # 'vuln-management': '/usr/share/osquery/packs/vuln-management.conf',
+  # 'hardware-monitoring': '/usr/share/osquery/packs/hardware-monitoring.conf',
+  # 'ossec-rootkit': '/usr/share/osquery/packs/ossec-rootkit.conf',
+  # 'windows-hardening': 'C:\\ProgramData\\osquery\\packs\\windows-hardening.conf',
+  # 'windows-attacks': 'C:\\ProgramData\\osquery\\packs\\windows-attacks.conf'
+#},
+
+# Set default osquery settings
+{% set default_config = salt.grains.filter_by({
+  'default':
+  {
+    'osquery':
+    {
+      'use_logrotate': 'True',
+      'logrotate_config': '/etc/logrotate.d/osquery',
+      'config_dataset':
+      {
+        'options':
+        {
+          'config_plugin': 'filesystem',
+          'disable_logging': 'false',
+          'logger_path': '/var/log/osquery',
+          'logger_plugin': 'filesystem',
+          'pidfile': '/var/osquery/osqueryd.pidfile',
+          'utc': 'true'
+        },
+        'schedule':
+        {
+          'system_info':
+          {
+            'interval': '3600',
+            'query': 'SELECT hostname, cpu_brand, physical_memory FROM system_info;'
+          }
+        },
+        'decorators':
+        {
+          'load':
+          [
+            'SELECT uuid AS host_uuid FROM system_info;',
+            'SELECT user AS username FROM logged_in_users ORDER BY time DESC LIMIT 1;'
+          ]
+        },
+        'packs': ()
+      }
+    }
+  }
+}, grain='host', base='default') %}
+
+# Get settings for os_family
+{% set os_lookup = {
+  'RedHat':
+  {
+    'package':
+    {
+      'skip_verify': '0',
+      'service': 'osqueryd',
+      'install_type': 'local',
+      'local_package': 
+      [
+        {
+          'pack_id': 'osquery-final',
+          'package': 'osquery-3.3.0-1.linux.x86_64',
+          'name': 'osquery',
+          'type': 'rpm'
+        }
+      ],
+      'repo_baseurl': '',
+      'repo_gpgkey': ''
+    }
+  },
+  'Debian':
+  {
+    'package':
+    {
+      'skip_verify': '0',
+      'service': 'osqueryd',
+      'install_type': 'local',
+      'local_package': 
+      [
+        {
+          'pack_id': 'osquery-final',
+          'package': 'osquery-3.3.0-1.linux.amd64',
+          'name': 'osquery',
+          'type': 'deb'
+        }
+      ],
+      'repo_baseurl': '',
+      'repo_gpgkey': ''
+    }
+  }
+} %}
+{% set os_map = os_lookup.get(grains.os_family, {}) %} 
+
+# update the default config with os specific settings
+{% do default_config.update(os_map) %}
+
+# Merge the default settings with pillar data
+{% set host_lookup = salt['pillar.get']('osquery:lookup', default=default_config, merge=True) %}
