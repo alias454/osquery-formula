@@ -8,7 +8,10 @@
 # Homebrew:     /usr/local/share/osquery/packs
 # make install: {PREFIX}/share/osquery/packs
 #
+# If use_fim_dataset is true don't forget to add in the pack to packs()
+#
 #'packs': {
+  # 'fim': '/usr/share/osquery/packs/fim.conf',
   # 'osquery-monitoring': '/usr/share/osquery/packs/osquery-monitoring.conf',
   # 'incident-response': '/usr/share/osquery/packs/incident-response.conf',
   # 'it-compliance': '/usr/share/osquery/packs/it-compliance.conf',
@@ -26,6 +29,8 @@
   {
     'osquery':
     {
+      'use_fim_dataset': 'False',
+      'fim_pack_path': '/usr/share/osquery/packs/fim.conf',
       'use_logrotate': 'True',
       'logrotate_config': '/etc/logrotate.d/osquery',
       'config_dataset':
@@ -56,6 +61,80 @@
           ]
         },
         'packs': ()
+      },
+      'fim_dataset':
+      {
+        'queries':
+        {
+          'file_events':
+          {
+            'query': 'SELECT * FROM file_events;',
+            'removed': 'false',
+            'interval': '300'
+          }
+        },
+        'file_paths':
+        {
+          'ssh_keys':
+          [
+            '/home/%/.ssh/%%'
+          ], 
+          'homes':
+          [
+            '/root/%%',
+            '/home/%%'
+          ],
+          'etc':
+          [
+            '/etc/%%'
+          ],
+          'binaries':
+          [
+            '/bin/%%',
+            '/usr/bin/%%',
+            '/usr/local/bin/%%',
+            '/opt/bin/%%',
+            '/sbin/%%',
+            '/usr/sbin/%%',
+            '/usr/local/sbin/%%',
+            '/opt/sbin/%%'
+          ],
+          'libraries':
+          [
+            '/lib/%%',
+            '/usr/lib/%%',
+            '/lib64/%%',
+            '/usr/lib64/%%'
+          ]
+        },
+        'exclude_paths':
+        {
+          'homes':
+          [
+            '/home/not_to_monitor/.ssh/%%'
+          ],
+          'ignored':
+          [
+            '/etc/passwd.lock',
+            '/etc/shadow.lock',
+            '/etc/gshadow.lock',
+            '/etc/group.lock',
+            '/etc/passwd+',
+            '/etc/passwd-',
+            '/etc/shadow+',
+            '/etc/shadow-',
+            '/etc/group+',
+            '/etc/group-',
+            '/etc/gshadow+',
+            '/etc/gshadow-',
+            '/etc/cas/timestamp',
+            '/etc/resolv.conf.tmp',
+            '/etc/pki/nssdb/key4.db-journal',
+            '/etc/pki/nssdb/cert9.db-journal',
+            '/etc/salt/gpgkeys/random_seed',
+            '/etc/blkid/blkid.tab.old'
+          ]
+        }
       }
     }
   }

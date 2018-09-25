@@ -1,3 +1,35 @@
+# Add default osquery packs or install your own.
+#
+# There are several 'default' packs installed with 'make install' or via
+# packages and/or Homebrew.
+#
+# Linux:        /usr/share/osquery/packs
+# OS X:         /var/osquery/packs
+# Homebrew:     /usr/local/share/osquery/packs
+# make install: {PREFIX}/share/osquery/packs
+#
+# If use_fim_dataset is true don't forget to add in the pack to packs()
+#
+#'packs': {
+  # 'fim': '/usr/share/osquery/packs/fim.conf',
+  # 'osquery-monitoring': '/usr/share/osquery/packs/osquery-monitoring.conf',
+  # 'incident-response': '/usr/share/osquery/packs/incident-response.conf',
+  # 'it-compliance': '/usr/share/osquery/packs/it-compliance.conf',
+  # 'osx-attacks': '/usr/share/osquery/packs/osx-attacks.conf',
+  # 'vuln-management': '/usr/share/osquery/packs/vuln-management.conf',
+  # 'hardware-monitoring': '/usr/share/osquery/packs/hardware-monitoring.conf',
+  # 'ossec-rootkit': '/usr/share/osquery/packs/ossec-rootkit.conf',
+  # 'windows-hardening': 'C:\\ProgramData\\osquery\\packs\\windows-hardening.conf',
+  # 'windows-attacks': 'C:\\ProgramData\\osquery\\packs\\windows-attacks.conf'
+#},
+
+# When using this file, contents for the fim_dataset and config_dataset
+# can be removed by commenting out lines for that item prior to the next salt runi
+
+#set some variables here to use within the pillar
+{% set use_fim_dataset = 'False' %}
+{% set fim_pack_path = '/usr/share/osquery/packs/fim.conf' %}
+
 # osquery docs https://osquery.readthedocs.io/en/stable/
 osquery:
   lookup:
@@ -28,8 +60,10 @@ osquery:
       skip_verify: '0'
     {% endif %}
     osquery:
-      use_logrotate: 'True'
-      logrotate_config: '/etc/logrotate.d/osquery'
+      use_fim_dataset: '{{ use_fim_dataset }}'           # Use provided file integrity monitoring config
+      fim_pack_path: '{{ fim_pack_path }}'               # Path to the fim config file location
+      use_logrotate: 'False'                             # Create logrotate config. Use when using filesystem logger_plugin
+      logrotate_config: '/etc/logrotate.d/osquery'       # Path to the logrotate config
       config_dataset:
         options:
           config_plugin: 'filesystem'
@@ -50,6 +84,9 @@ osquery:
             - 'SELECT uuid AS host_uuid FROM system_info;'
             #- 'SELECT user AS username FROM logged_in_users ORDER BY time DESC LIMIT 1;'
         packs:
+        {% if use_fim_dataset == 'True' %}
+          fim: '{{ fim_pack_path }}'
+        {% endif %}
           osquery-monitoring: /usr/share/osquery/packs/osquery-monitoring.conf
           ossec-rootkit: /usr/share/osquery/packs/ossec-rootkit.conf
           incident-response: /usr/share/osquery/packs/incident-response.conf
@@ -59,3 +96,55 @@ osquery:
           #osx-attacks: /usr/share/osquery/packs/osx-attacks.conf
           #windows-hardening: C:\\ProgramData\\osquery\\packs\\windows-hardening.conf
           #windows-attacks: C:\\ProgramData\\osquery\\packs\\windows-attacks.conf
+      fim_dataset:
+        queries:
+          file_events:
+            query: 'SELECT * FROM file_events;'
+            removed: 'false'
+            interval: '300'
+        file_paths:
+          ssh_keys:
+            - '/home/%/.ssh/%%' 
+          homes:
+            - '/root/%%'
+            - '/home/%%'
+          etc:
+            - '/etc/%%'
+          binaries:
+            - '/bin/%%'
+            - '/usr/bin/%%'
+            - '/usr/local/bin/%%'
+            - '/opt/bin/%%'
+            - '/sbin/%%'
+            - '/usr/sbin/%%'
+            - '/usr/local/sbin/%%'
+            - '/opt/sbin/%%'
+          libraries:
+            - '/lib/%%'
+            - '/usr/lib/%%'
+            - '/lib64/%%'
+            - '/usr/lib64/%%'
+        exclude_paths:
+          homes:
+            - '/home/not_to_monitor/.ssh/%%'
+          #tmp:
+            #- '/tmp/%%'
+          ignored:
+            - '/etc/passwd.lock'
+            - '/etc/shadow.lock'
+            - '/etc/gshadow.lock'
+            - '/etc/group.lock'
+            - '/etc/passwd+'
+            - '/etc/passwd-'
+            - '/etc/shadow+'
+            - '/etc/shadow-'
+            - '/etc/group+'
+            - '/etc/group-'
+            - '/etc/gshadow+'
+            - '/etc/gshadow-'
+            - '/etc/cas/timestamp'
+            - '/etc/resolv.conf.tmp'
+            - '/etc/pki/nssdb/key4.db-journal'
+            - '/etc/pki/nssdb/cert9.db-journal'
+            - '/etc/salt/gpgkeys/random_seed'
+            - '/etc/blkid/blkid.tab.old'

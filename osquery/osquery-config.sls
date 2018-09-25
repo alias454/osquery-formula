@@ -26,3 +26,15 @@ osquery-symlink-flags:
     - user: root
     - group: root
     - mode: '0644'
+
+# Manage the optional fime config file
+{% if config.osquery.use_fim_dataset == 'True' %}
+{{ config.osquery.fim_pack_path }}:
+  file.serialize:
+    - dataset: 
+        {{ config.osquery.fim_dataset|yaml }}
+    - formatter: json
+    - user: root
+    - group: root
+    - mode: '0644'
+{% endif %}
