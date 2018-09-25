@@ -27,7 +27,7 @@
 # can be removed by commenting out lines for that item prior to the next salt runi
 
 #set some variables here to use within the pillar
-{% set use_fim_dataset = 'False' %}
+{% set use_fim_dataset = 'True' %}
 {% set fim_pack_path = '/usr/share/osquery/packs/fim.conf' %}
 
 # osquery docs https://osquery.readthedocs.io/en/stable/
@@ -35,6 +35,7 @@ osquery:
   lookup:
     package:
     {% if grains['os_family'] == 'RedHat' %}
+      name: 'osquery'                               # Name of package to install
       service: 'osqueryd'                           # Name of service to manage
       install_type: 'local'                         # Install type can be package or local (support for tarball not implemented) 
       local_package:                                # Can be multiple packages
@@ -43,10 +44,12 @@ osquery:
           name: 'osquery'                           # Name of installed package
           type: 'rpm'                               # Type should be deb or rpm based on platform
       use_repo: 'False'                             # Can be installed from repos or a local rpm
-      repo_baseurl: ''
-      repo_gpgkey: ''
+      repo_version: '3.3.0',
+      repo_baseurl: 'https://pkg.osquery.io/rpm/osquery-s3-rpm.repo'
+      repo_gpgkey: 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-osquery'
       skip_verify: '0'
     {% elif grains['os_family'] == 'Debian' %}
+      name: 'osquery'                               # Name of package to install
       service: 'osqueryd'                           # Name of service to manage
       install_type: 'local'                         # Install type can be package or local (support for tarball not implemented) 
       local_package:                                # Can be multiple packages
@@ -54,9 +57,11 @@ osquery:
           package: 'osquery-3.3.0-1.linux.amd64'    # Local package to be deployed
           name: 'osquery'                           # Name of installed package
           type: 'deb'                               # Type should be deb or rpm based on platform
-      use_repo: 'False'                             # Debian 9 does not require an external repo
-      repo_baseurl: ''
-      repo_gpgkey: ''
+      use_repo: 'False'                             # Can be installed from repos or a local deb
+      repo_version: '3.3.0',
+      repo_baseurl: 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'
+      repo_keyserver: 'keyserver.ubuntu.com'
+      repo_key: '1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B'
       skip_verify: '0'
     {% endif %}
     osquery:

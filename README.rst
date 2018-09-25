@@ -2,7 +2,8 @@
 osquery-formula
 ================
 
-A saltstack formula to install osquery on RHEL or Debian based systems using a local downloaded package.
+A saltstack formula to install osquery on RHEL or Debian based systems.  
+Install can  use a local downloaded package or remote repo.
 
 
 Available states
@@ -16,10 +17,14 @@ Available states
 .. contents::
     :local:
 
+``osquery-repo``
+------------
+Manage repo files on RHEL/CentOS 7/Debian systems
+
 ``osquery.package``
 ----------------------------
 
-Installs osquery using local package. get the latest package here https://osquery.io/downloads/official/
+Installs osquery using repo or local package. Get the latest package here https://osquery.io/downloads/official/
 
 ``osquery.config``
 ----------------------------

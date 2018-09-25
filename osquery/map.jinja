@@ -147,6 +147,7 @@
     'package':
     {
       'skip_verify': '0',
+      'name': 'osquery',
       'service': 'osqueryd',
       'install_type': 'local',
       'local_package': 
@@ -158,8 +159,9 @@
           'type': 'rpm'
         }
       ],
-      'repo_baseurl': '',
-      'repo_gpgkey': ''
+      'repo_version': '3.3.0',
+      'repo_baseurl': 'https://pkg.osquery.io/rpm/osquery-s3-rpm.repo',
+      'repo_gpgkey': 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-osquery'
     }
   },
   'Debian':
@@ -167,6 +169,7 @@
     'package':
     {
       'skip_verify': '0',
+      'name': 'osquery',
       'service': 'osqueryd',
       'install_type': 'local',
       'local_package': 
@@ -178,8 +181,10 @@
           'type': 'deb'
         }
       ],
-      'repo_baseurl': '',
-      'repo_gpgkey': ''
+      'repo_version': '3.3.0',
+      'repo_baseurl': 'deb [arch=amd64] https://pkg.osquery.io/deb deb main',
+      'repo_keyserver': 'keyserver.ubuntu.com',
+      'repo_key': '1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B',
     }
   }
 } %}
