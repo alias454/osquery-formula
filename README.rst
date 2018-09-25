@@ -21,22 +21,22 @@ Available states
 ------------
 Manage repo files on RHEL/CentOS 7/Debian systems
 
-``osquery.package``
+``osquery-package``
 ----------------------------
 
 Installs osquery using repo or local package. Get the latest package here https://osquery.io/downloads/official/
 
-``osquery.config``
+``osquery-config``
 ----------------------------
 
 Sets up the configuration file using contents defined in `pillar <pillar.example>`_.
 
-``osquery.service``
+``osquery-service``
 ----------------------------
 
 Enables and runs the osquery service.
 
-``osquery.logrotate``
+``osquery-logrotate``
 ----------------------------
 
 Optionally configures logrotate on the host.
