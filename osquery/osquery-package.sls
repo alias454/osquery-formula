@@ -12,7 +12,6 @@ package-install-osquery:
       - service: service-osquery
 
 {% elif config.package.install_type == 'local' %}
-{% if config.package.install_type == 'local' %}
 
 # Install osquery from a local package
 package-install-osquery:
